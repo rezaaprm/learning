@@ -1,3 +1,5 @@
+streamlit
+streamlit_extras
 aiobotocore @ file:///C:/b/abs_a0zxrsvpwx/croot/aiobotocore_1714464454692/work
 aiohttp @ file:///C:/b/abs_8860tt1424/croot/aiohttp_1715108828392/work
 aioitertools @ file:///tmp/build/80754af9/aioitertools_1607109665762/work
@@ -342,7 +344,6 @@ streamlit-camera-input-live==0.2.0
 streamlit-card==1.0.2
 streamlit-embedcode==0.1.2
 streamlit-extras==0.4.7
-numpy==2.2.0
 streamlit-faker==0.0.3
 streamlit-image-coordinates==0.1.9
 streamlit-keyup==0.2.4
