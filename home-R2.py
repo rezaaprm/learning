@@ -1,11 +1,11 @@
 # Import Dashboard Library
 import streamlit as st
-from streamlit-extras.add_vertical_space import add_vertical_space
+from streamlit_extras.add_vertical_space import add_vertical_space
 
 # Library Tambahan
 import time
 import streamlit as st
-from streamlit-extras.let_it_rain import rain 
+from streamlit_extras.let_it_rain import rain 
 from plotly.subplots import make_subplots
 import plotly.graph_objects as go
 
