@@ -40,7 +40,7 @@ st.markdown("## Dashboard of Video Games Sales using Streamlit Framework")
 
 # Dataset
 # dataset = pd.read_csv("../Dataset/vgsales.csv")
-dataset = pd.read_csv("Dataset/vgsales.csv")
+dataset = pd.read_csv("vgsales.csv")
 
 # Calculate Global-Sales
 df = dataset[["NA_Sales", "EU_Sales", "JP_Sales", "Other_Sales"]].aggregate("sum").sort_values(ascending=True).reset_index()
