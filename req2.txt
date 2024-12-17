@@ -392,7 +392,7 @@ wheel==0.43.0
 widgetsnbextension @ file:///C:/b/abs_538o2crz7f/croot/widgetsnbextension_1710960099872/work
 win-inet-pton @ file:///C:/Users/dev-admin/perseverance-python-buildout/croot/win_inet_pton_1699472992992/work
 wrapt @ file:///C:/Users/dev-admin/perseverance-python-buildout/croot/wrapt_1699480231633/work
-xarray @ file:///C:/Users/dev-admin/perseverance-python-buildout/croot/xarray_1699480274069/work
+xarray @ file:///C:/Users/dev-admin/perseverance-pyt; hon-buildout/croot/xarray_1699480274069/work
 xlwings @ file:///C:/b/abs_6bsaqa795f/croot/xlwings_1718046948745/work
 xyzservices @ file:///C:/Users/dev-admin/perseverance-python-buildout/croot/xyzservices_1699548906163/work
 yahoofinancials==1.20
