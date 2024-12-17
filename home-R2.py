@@ -85,7 +85,7 @@ with col1:
 
     for region, pattern in zip(regions, patterns):
         fig.add_trace(go.Bar(x=df["Platform"], y=df[region], name=region.replace('_', ' '), marker=dict(pattern_shape=pattern)))
-    fig.update_layout(barmode="stack", title="Penjualan Berdasarkan Platform dan Region", xaxis_title="Platform", yaxis_title="Jumlah Penjualan (jutaan unit)", showlegend=True)
+    fig.update_layout(barmode="stack", title="Sales by Platform and Region & Global Sales Every 5 Year", xaxis_title="Platform", yaxis_title="Jumlah Penjualan (jutaan unit)", showlegend=True)
 
     
     st.plotly_chart(fig)
@@ -166,7 +166,7 @@ with col1:
     fig.add_trace(go.Bar(y=df.Platform, x=df.Other_Sales, name="Others", marker=dict(cornerradius="40%"), orientation='h'),4,1,)
 
     fig.update_traces(marker_color=px.colors.sequential.algae_r)
-    fig.update_layout(title="5 Platform Tersering dari angka Penjualan Global", xaxis_title="", yaxis_title="")
+    fig.update_layout(title="Top 5 Platforms by Global Sales Figures", xaxis_title="", yaxis_title="")
     fig.update_layout(barmode='group')
     st.plotly_chart(fig)
     # fig.show()
@@ -248,7 +248,7 @@ with col1:
 
     layout=dict(barcornerradius=15,),
     fig.update_traces(marker_color=px.colors.sequential.algae_r)
-    fig.update_layout(title="5 Platform Tersering dari angka Penjualan Global", xaxis_title="Sales", yaxis_title="Platform", barmode='group')
+    fig.update_layout(title="Top 5 Platforms by Global Sales Figures", xaxis_title="Sales", yaxis_title="Platform", barmode='group')
 
     st.plotly_chart(fig)
     # fig.show()
