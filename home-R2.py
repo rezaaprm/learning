@@ -66,41 +66,60 @@ with col2:
     st.plotly_chart(fig, use_container_width=True)
 
 
-# Additional (Perbaikan: Arsiran silau diganti Grouped Bar Chart solid yang bersih)
+# Additional (Stack Bar dengan Arsiran Tipis + Line Chart Multi-Track Per Region)
 col1, col2 = st.columns([0.5, 0.5], gap="small")
 
 with col1:
     df_platform = dataset.groupby("Platform")[["NA_Sales", "EU_Sales", "JP_Sales", "Other_Sales", "Global_Sales"]].aggregate("sum").reset_index()
     df_platform = df_platform.sort_values(by="Global_Sales", ascending=False).head(5)
-    
-    # Melt dataframe untuk stacked bar chart yang bersih
-    df_melted = df_platform.melt(
-        id_vars='Platform', 
-        value_vars=['NA_Sales', 'EU_Sales', 'JP_Sales', 'Other_Sales'],
-        var_name='Region', 
-        value_name='Sales'
-    )
-    df_melted['Region'] = df_melted['Region'].str.replace('_Sales', '')
 
-    # Menggunakan barmode='stack' agar menumpuk ke atas, tapi dengan warna solid (tanpa arsiran)
-    fig = px.bar(
-        df_melted,
-        x='Platform',
-        y='Sales',
-        color='Region',
-        barmode="stack",  # Kembali bertumpuk ke atas
-        title="Sales by Platform and Region",
-        color_discrete_sequence=px.colors.qualitative.Prism  # Warna solid modern
+    regions = ["NA_Sales", "EU_Sales", "JP_Sales", "Other_Sales"]
+    patterns = ["/", "x", "+", "-"] # Jenis arsiran/pola
+
+    fig = go.Figure()
+
+    for region, pattern in zip(regions, patterns):
+        fig.add_trace(go.Bar(
+            x=df_platform["Platform"], 
+            y=df_platform[region], 
+            name=region.replace('_', ' '), 
+            marker=dict(
+                pattern_shape=pattern,
+                pattern_solidity=0.3  # <-- Nilai ini mengecilkan/menipiskan arsiran agar tidak tebal/silau
+            )
+        ))
+        
+    fig.update_layout(
+        barmode="stack", 
+        title="Sales by Platform and Region (Stacked with Thin Patterns)", 
+        xaxis_title="Platform", 
+        yaxis_title="Sales (juta unit)", 
+        template="plotly_dark",
+        yaxis=dict(rangemode="tozero")
     )
-    fig.update_layout(template="plotly_dark", yaxis=dict(rangemode="tozero"))
     st.plotly_chart(fig, use_container_width=True)
 
 with col2:
-    df_yearsales_region = dataset.groupby("Year")[['NA_Sales', 'EU_Sales', 'JP_Sales', 'Other_Sales', 'Global_Sales']].aggregate("sum").reset_index()
-    df = df_yearsales_region
+    # Line chart dibuat detail (multi-track) berdasarkan masing-masing Region
+    df_yearsales_region = dataset.groupby("Year")[['NA_Sales', 'EU_Sales', 'JP_Sales', 'Other_Sales']].aggregate("sum").reset_index()
+    
+    df_melted_year = df_yearsales_region.melt(
+        id_vars='Year',
+        value_vars=['NA_Sales', 'EU_Sales', 'JP_Sales', 'Other_Sales'],
+        var_name='Region',
+        value_name='Sales'
+    )
+    df_melted_year['Region'] = df_melted_year['Region'].str.replace('_Sales', '')
 
-    fig = px.line(df, x="Year", y="Global_Sales", color_discrete_sequence=px.colors.sequential.Agsunset_r, markers=True)
-    fig.update_layout(title="Global Sales Trend Over Years", template="plotly_dark", yaxis=dict(rangemode="tozero"))
+    fig = px.line(
+        df_melted_year, 
+        x="Year", 
+        y="Sales", 
+        color="Region", # Membuat multi-track line chart berdasarkan region
+        markers=True,
+        title="Sales Trend by Region Over Years (Multi-Track)"
+    )
+    fig.update_layout(template="plotly_dark", yaxis=dict(rangemode="tozero"))
     st.plotly_chart(fig, use_container_width=True)
 
 
@@ -210,7 +229,7 @@ with col4:
     st.plotly_chart(fig, use_container_width=True)
 
 
-# Group Bar Chart (Perbaikan Bug Sintaks / Koma Berlebih pada Bagian Ini)
+# Group Bar Chart
 col1, col2, col3, col4 = st.columns([0.25, 0.25, 0.25, 0.25], gap="small")
 
 with col1:
