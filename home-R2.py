@@ -20,7 +20,7 @@ import numpy as np
 # Config Web Streamlit
 st.set_page_config(page_title="Video Games Sales", layout="wide")
 st.snow()
-st.toast("🎮")
+st.toast("Dashboard 🎮 loaded successfully")
 
 def example():
     rain(
