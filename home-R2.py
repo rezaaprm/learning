@@ -18,7 +18,7 @@ import pandas as pd
 import numpy as np 
 
 # Config Web Streamlit
-st.set_page_config(page_title="Video Games Sales Dashboard", layout="wide")
+st.set_page_config(page_title="Video Games Sales", layout="wide")
 st.balloons()
 
 def example():
@@ -31,7 +31,8 @@ def example():
 example()
 
 with st.spinner("Please Wait..."):
-    time.sleep(2)
+    time.sleep(3)
+
 
 # Container-Header
 st.markdown("## Dashboard of Video Games Sales using Streamlit Framework")
@@ -44,39 +45,38 @@ except Exception as e:
     st.stop()
 
 # Calculate Global-Sales
-df_region = dataset[["NA_Sales", "EU_Sales", "JP_Sales", "Other_Sales"]].aggregate("sum").sort_values(ascending=True).reset_index()
-df_region.columns = ["Region", "Sales"]
+df = dataset[["NA_Sales", "EU_Sales", "JP_Sales", "Other_Sales"]].aggregate("sum").sort_values(ascending=True).reset_index()
+df.columns = ["Region", "Sales"]
 
 # Container-Global_Sales
-add_vertical_space(1)
+add_vertical_space(2)
 st.info("Exploration Data Analysis on Global Sales")
-col1, col2 = st.columns(2, gap="small")
+col1, col2 = st.columns([0.5, 0.5], gap="small")
 
 with col1:
-    fig = px.bar(df_region, y="Region", x="Sales", text_auto='.4s')
+    fig = px.bar(df, y="Region", x="Sales", text_auto='.4s')
     fig.update_traces(marker_color=px.colors.sequential.Brwnyl)
     fig.update_layout(title="Sum of Games Sales by Regions", xaxis_title="", yaxis_title="", template="plotly_dark")
     st.plotly_chart(fig, use_container_width=True)
 
 with col2:
-    fig = px.pie(df_region, values="Sales", names="Region", hole=0.5, color_discrete_sequence=px.colors.sequential.Magenta_r)
+    fig = px.pie(df, values="Sales", names="Region", hole=0.5, color_discrete_sequence=px.colors.sequential.Magenta_r)
     fig.update_traces(textinfo="percent")
     fig.update_layout(title="Percentage of Games Sales by Regions", template="plotly_dark")
     st.plotly_chart(fig, use_container_width=True)
 
 
-# Additional Section (Perbaikan: Mengganti Stacked ber-arsiran dengan Grouped Bar yang Bersih)
-col1, col2 = st.columns(2, gap="small")
+# Additional (Perbaikan: Arsiran silau diganti Grouped Bar Chart solid yang bersih)
+col1, col2 = st.columns([0.5, 0.5], gap="small")
 
 with col1:
     df_platform = dataset.groupby("Platform")[["NA_Sales", "EU_Sales", "JP_Sales", "Other_Sales", "Global_Sales"]].aggregate("sum").reset_index()
     df_platform = df_platform.sort_values(by="Global_Sales", ascending=False).head(5)
     
-    # Melt dataframe agar mudah dijadikan grouped bar chart yang bersih tanpa arsiran silau
     df_melted = df_platform.melt(
-        id_vars='Platform',
+        id_vars='Platform', 
         value_vars=['NA_Sales', 'EU_Sales', 'JP_Sales', 'Other_Sales'],
-        var_name='Region',
+        var_name='Region', 
         value_name='Sales'
     )
     df_melted['Region'] = df_melted['Region'].str.replace('_Sales', '')
@@ -86,76 +86,183 @@ with col1:
         x='Platform',
         y='Sales',
         color='Region',
-        barmode='group',
-        title="Top 5 Platforms Sales by Region",
+        barmode="group",
+        title="Sales by Platform and Region",
         color_discrete_sequence=px.colors.qualitative.Prism
     )
     fig.update_layout(template="plotly_dark", yaxis=dict(rangemode="tozero"))
     st.plotly_chart(fig, use_container_width=True)
 
 with col2:
-    df_yearsales = dataset.groupby("Year")[['NA_Sales', 'EU_Sales', 'JP_Sales', 'Other_Sales', 'Global_Sales']].aggregate("sum").reset_index()
-    
-    fig = px.line(
-        df_yearsales, 
-        x="Year", 
-        y="Global_Sales", 
-        markers=True,
-        color_discrete_sequence=px.colors.sequential.Agsunset_r
-    )
+    df_yearsales_region = dataset.groupby("Year")[['NA_Sales', 'EU_Sales', 'JP_Sales', 'Other_Sales', 'Global_Sales']].aggregate("sum").reset_index()
+    df = df_yearsales_region
+
+    fig = px.line(df, x="Year", y="Global_Sales", color_discrete_sequence=px.colors.sequential.Agsunset_r, markers=True)
     fig.update_layout(title="Global Sales Trend Over Years", template="plotly_dark", yaxis=dict(rangemode="tozero"))
     st.plotly_chart(fig, use_container_width=True)
 
 
 # Divider
 st.info("Analyze of Best Games Names, Publisher, Genre, and Platform on Global Sales")
+# Single Bar Chart
+col1, col2, col3, col4 = st.columns([0.25, 0.25, 0.25, 0.25], gap="small")
 
-# Top 5 Performance Overview (Clean Single Bar Charts)
-col1, col2, col3, col4 = st.columns(4, gap="small")
+# Calculate by Platform
+with col1:
+    df = dataset.groupby("Platform")[["NA_Sales", "EU_Sales", "JP_Sales", "Other_Sales", "Global_Sales"]].aggregate("sum").reset_index()
+    df = df.sort_values(by=["Global_Sales"]).reset_index().tail(5)
 
-categories = [("Platform", col1), ("Genre", col2), ("Publisher", col3), ("Name", col4)]
+    fig = px.bar(df, y="Platform", x="Global_Sales", text_auto='.4s')
+    fig.update_traces(marker_color=px.colors.sequential.Bluyl_r)
+    fig.update_layout(title="Best of Platforms by Regions", xaxis_title="", yaxis_title="", template="plotly_dark")
+    st.plotly_chart(fig, use_container_width=True)
 
-for col_name, col_obj in categories:
-    with col_obj:
-        df_top = dataset.groupby(col_name)[["Global_Sales"]].aggregate("sum").reset_index()
-        df_top = df_top.sort_values(by="Global_Sales", ascending=True).tail(5)
+# Calculate by Genre
+with col2:
+    df = dataset.groupby("Genre")[["NA_Sales", "EU_Sales", "JP_Sales", "Other_Sales", "Global_Sales"]].aggregate("sum").reset_index()
+    df = df.sort_values(by=["Global_Sales"]).reset_index().tail(5)
 
-        fig = px.bar(df_top, y=col_name, x="Global_Sales", text_auto='.4s', orientation='h')
-        fig.update_traces(marker_color=px.colors.sequential.Bluyl_r)
-        fig.update_layout(
-            title=f"Top 5 {col_name}s", 
-            xaxis_title="", 
-            yaxis_title="", 
-            template="plotly_dark",
-            margin=dict(l=10, r=10, t=40, b=10)
-        )
-        st.plotly_chart(fig, use_container_width=True)
+    fig = px.bar(df, y="Genre", x="Global_Sales", text_auto='.4s')
+    fig.update_traces(marker_color=px.colors.sequential.Bluyl_r)
+    fig.update_layout(title="Best of Genres by Regions", xaxis_title="", yaxis_title="", template="plotly_dark")
+    st.plotly_chart(fig, use_container_width=True)
+
+# Calculate by Publisher
+with col3:
+    df = dataset.groupby("Publisher")[["NA_Sales", "EU_Sales", "JP_Sales", "Other_Sales", "Global_Sales"]].aggregate("sum").reset_index()
+    df = df.sort_values(by=["Global_Sales"]).reset_index().tail(5)
+
+    fig = px.bar(df, y="Publisher", x="Global_Sales", text_auto='.4s')
+    fig.update_traces(marker_color=px.colors.sequential.Bluyl_r)
+    fig.update_layout(title="Best of Publishers by Regions", xaxis_title="", yaxis_title="", template="plotly_dark")
+    st.plotly_chart(fig, use_container_width=True)
+
+# Calculate by Name
+with col4:
+    df = dataset.groupby("Name")[["NA_Sales", "EU_Sales", "JP_Sales", "Other_Sales", "Global_Sales"]].aggregate("sum").reset_index()
+    df = df.sort_values(by=["Global_Sales"]).reset_index().tail(5)
+
+    fig = px.bar(df, y="Name", x="Global_Sales", text_auto='.4s')
+    fig.update_traces(marker_color=px.colors.sequential.Bluyl_r)
+    fig.update_layout(title="Best of Games by Regions", xaxis_title="", yaxis_title="", template="plotly_dark")
+    st.plotly_chart(fig, use_container_width=True)
 
 
-# Group Bar Chart (Perbaikan Syntax Error / Tuple Bug dari Kode Sebelumnya)
-st.info("Detailed Regional Breakdown by Category")
-col1, col2, col3, col4 = st.columns(4, gap="small")
+# Group Bar Row Chart (Make Subplots)
+col1, col2, col3, col4 = st.columns([0.25, 0.25, 0.25, 0.25], gap="small")
 
-categories_detailed = [("Platform", col1), ("Genre", col2), ("Publisher", col3), ("Name", col4)]
+with col1:
+    df = dataset.groupby("Platform")[["NA_Sales", "EU_Sales", "JP_Sales", "Other_Sales", "Global_Sales"]].aggregate("sum")
+    df = df.sort_values(by=["Global_Sales"]).reset_index().tail(5)
+    
+    fig = make_subplots(rows=4, cols=1, shared_yaxes=True)
+    fig.add_trace(go.Bar(y=df.Platform, x=df.NA_Sales, name="North America", orientation='h'), 1, 1)
+    fig.add_trace(go.Bar(y=df.Platform, x=df.EU_Sales, name="Europe", orientation='h'), 2, 1)
+    fig.add_trace(go.Bar(y=df.Platform, x=df.JP_Sales, name="Japanese", orientation='h'), 3, 1)
+    fig.add_trace(go.Bar(y=df.Platform, x=df.Other_Sales, name="Others", orientation='h'), 4, 1)
 
-for col_name, col_obj in categories_detailed:
-    with col_obj:
-        df_det = dataset.groupby(col_name)[["NA_Sales", "EU_Sales", "JP_Sales", "Other_Sales", "Global_Sales"]].aggregate("sum")
-        df_det = df_det.sort_values(by="Global_Sales", ascending=True).tail(5).reset_index()
+    fig.update_traces(marker_color=px.colors.sequential.algae_r)
+    fig.update_layout(title="Top 5 Platforms by Global Sales Figures", xaxis_title="", yaxis_title="", barmode='group', template="plotly_dark")
+    st.plotly_chart(fig, use_container_width=True)
 
-        fig = go.Figure()
-        fig.add_trace(go.Bar(y=df_det[col_name], x=df_det["NA_Sales"], name="North America", orientation='h'))
-        fig.add_trace(go.Bar(y=df_det[col_name], x=df_det["EU_Sales"], name="Europe", orientation='h'))
-        fig.add_trace(go.Bar(y=df_det[col_name], x=df_det["JP_Sales"], name="Japanese", orientation='h'))
-        fig.add_trace(go.Bar(y=df_det[col_name], x=df_det["Other_Sales"], name="Others", orientation='h'))
+with col2:
+    df = dataset.groupby("Genre")[["NA_Sales", "EU_Sales", "JP_Sales", "Other_Sales", "Global_Sales"]].aggregate("sum")
+    df = df.sort_values(by=["Global_Sales"]).reset_index().tail(5)
+    
+    fig = make_subplots(rows=4, cols=1, shared_yaxes=True)
+    fig.add_trace(go.Bar(y=df.Genre, x=df.NA_Sales, name="North America", orientation='h'), 1, 1)
+    fig.add_trace(go.Bar(y=df.Genre, x=df.EU_Sales, name="Europe", orientation='h'), 2, 1)
+    fig.add_trace(go.Bar(y=df.Genre, x=df.JP_Sales, name="Japanese", orientation='h'), 3, 1)
+    fig.add_trace(go.Bar(y=df.Genre, x=df.Other_Sales, name="Others", orientation='h'), 4, 1)
 
-        fig.update_traces(marker_color=px.colors.sequential.algae_r)
-        fig.update_layout(
-            title=f"Regional Breakdown by {col_name}",
-            xaxis_title="Sales",
-            yaxis_title=col_name,
-            barmode='group',
-            template="plotly_dark",
-            margin=dict(l=10, r=10, t=40, b=10)
-        )
-        st.plotly_chart(fig, use_container_width=True)
+    fig.update_traces(marker_color=px.colors.sequential.algae_r)
+    fig.update_layout(title="Best Genre by Regions", xaxis_title="", yaxis_title="", barmode='group', template="plotly_dark")
+    st.plotly_chart(fig, use_container_width=True)
+
+with col3:
+    df = dataset.groupby("Publisher")[["NA_Sales", "EU_Sales", "JP_Sales", "Other_Sales", "Global_Sales"]].aggregate("sum")
+    df = df.sort_values(by=["Global_Sales"]).reset_index().tail(5)
+
+    fig = make_subplots(rows=4, cols=1, shared_yaxes=True)
+    fig.add_trace(go.Bar(y=df.Publisher, x=df.NA_Sales, name="North America", orientation='h'), 1, 1)
+    fig.add_trace(go.Bar(y=df.Publisher, x=df.EU_Sales, name="Europe", orientation='h'), 2, 1)
+    fig.add_trace(go.Bar(y=df.Publisher, x=df.JP_Sales, name="Japanese", orientation='h'), 3, 1)
+    fig.add_trace(go.Bar(y=df.Publisher, x=df.Other_Sales, name="Others", orientation='h'), 4, 1)
+
+    fig.update_traces(marker_color=px.colors.sequential.algae_r)
+    fig.update_layout(title="Best Publisher by Regions", xaxis_title="", yaxis_title="", barmode='group', template="plotly_dark")
+    st.plotly_chart(fig, use_container_width=True)
+
+with col4:
+    df = dataset.groupby("Name")[["NA_Sales", "EU_Sales", "JP_Sales", "Other_Sales", "Global_Sales"]].aggregate("sum")
+    df = df.sort_values(by=["Global_Sales"]).reset_index().tail(5)
+
+    fig = make_subplots(rows=4, cols=1, shared_yaxes=True)
+    fig.add_trace(go.Bar(y=df.Name, x=df.NA_Sales, name="North America", orientation='h'), 1, 1)
+    fig.add_trace(go.Bar(y=df.Name, x=df.EU_Sales, name="Europe", orientation='h'), 2, 1)
+    fig.add_trace(go.Bar(y=df.Name, x=df.JP_Sales, name="Japanese", orientation='h'), 3, 1)
+    fig.add_trace(go.Bar(y=df.Name, x=df.Other_Sales, name="Others", orientation='h'), 4, 1)
+
+    fig.update_traces(marker_color=px.colors.sequential.algae_r)
+    fig.update_layout(title="Best Games by Regions", xaxis_title="", yaxis_title="", barmode='group', template="plotly_dark")
+    st.plotly_chart(fig, use_container_width=True)
+
+
+# Group Bar Chart (Perbaikan Bug Sintaks / Koma Berlebih pada Bagian Ini)
+col1, col2, col3, col4 = st.columns([0.25, 0.25, 0.25, 0.25], gap="small")
+
+with col1:
+    df = dataset.groupby("Platform")[["NA_Sales", "EU_Sales", "JP_Sales", "Other_Sales", "Global_Sales"]].aggregate("sum")
+    df = df.sort_values(by=["Global_Sales"]).reset_index().tail(5)
+
+    fig = go.Figure()
+    fig.add_trace(go.Bar(y=df["Platform"], x=df["NA_Sales"], name="North America", orientation='h'))
+    fig.add_trace(go.Bar(y=df["Platform"], x=df["EU_Sales"], name="Europe", orientation='h'))
+    fig.add_trace(go.Bar(y=df["Platform"], x=df["JP_Sales"], name="Japanese", orientation='h'))
+    fig.add_trace(go.Bar(y=df["Platform"], x=df["Other_Sales"], name="Others", orientation='h'))
+
+    fig.update_traces(marker_color=px.colors.sequential.algae_r)
+    fig.update_layout(title="Top 5 Platforms by Global Sales Figures", xaxis_title="Sales", yaxis_title="Platform", barmode='group', template="plotly_dark")
+    st.plotly_chart(fig, use_container_width=True)
+    
+with col2:
+    df = dataset.groupby("Genre")[["NA_Sales", "EU_Sales", "JP_Sales", "Other_Sales", "Global_Sales"]].aggregate("sum")
+    df = df.sort_values(by=["Global_Sales"]).reset_index().tail(5)
+
+    fig = go.Figure()
+    fig.add_trace(go.Bar(y=df["Genre"], x=df["NA_Sales"], name="North America", orientation='h'))
+    fig.add_trace(go.Bar(y=df["Genre"], x=df["EU_Sales"], name="Europe", orientation='h'))
+    fig.add_trace(go.Bar(y=df["Genre"], x=df["JP_Sales"], name="Japanese", orientation='h'))
+    fig.add_trace(go.Bar(y=df["Genre"], x=df["Other_Sales"], name="Others", orientation='h'))
+
+    fig.update_traces(marker_color=px.colors.sequential.algae_r)
+    fig.update_layout(title="Best Genre by Regions", xaxis_title="Sales", yaxis_title="Genre", barmode='group', template="plotly_dark")
+    st.plotly_chart(fig, use_container_width=True)
+
+with col3:
+    df = dataset.groupby("Publisher")[["NA_Sales", "EU_Sales", "JP_Sales", "Other_Sales", "Global_Sales"]].aggregate("sum")
+    df = df.sort_values(by=["Global_Sales"]).reset_index().tail(5)
+
+    fig = go.Figure()
+    fig.add_trace(go.Bar(y=df["Publisher"], x=df["NA_Sales"], name="North America", orientation='h'))
+    fig.add_trace(go.Bar(y=df["Publisher"], x=df["EU_Sales"], name="Europe", orientation='h'))
+    fig.add_trace(go.Bar(y=df["Publisher"], x=df["JP_Sales"], name="Japanese", orientation='h'))
+    fig.add_trace(go.Bar(y=df["Publisher"], x=df["Other_Sales"], name="Others", orientation='h'))
+
+    fig.update_traces(marker_color=px.colors.sequential.algae_r)
+    fig.update_layout(title="Best Publisher by Regions", xaxis_title="Sales", yaxis_title="Publisher", barmode='group', template="plotly_dark")
+    st.plotly_chart(fig, use_container_width=True)
+
+with col4:
+    df = dataset.groupby("Name")[["NA_Sales", "EU_Sales", "JP_Sales", "Other_Sales", "Global_Sales"]].aggregate("sum")
+    df = df.sort_values(by=["Global_Sales"]).reset_index().tail(5)
+
+    fig = go.Figure()
+    fig.add_trace(go.Bar(y=df["Name"], x=df["NA_Sales"], name="North America", orientation='h'))
+    fig.add_trace(go.Bar(y=df["Name"], x=df["EU_Sales"], name="Europe", orientation='h'))
+    fig.add_trace(go.Bar(y=df["Name"], x=df["JP_Sales"], name="Japanese", orientation='h'))
+    fig.add_trace(go.Bar(y=df["Name"], x=df["Other_Sales"], name="Others", orientation='h'))
+
+    fig.update_traces(marker_color=px.colors.sequential.algae_r)
+    fig.update_layout(title="Best Games by Regions", xaxis_title="Sales", yaxis_title="Games", barmode='group', template="plotly_dark")
+    st.plotly_chart(fig, use_container_width=True)
