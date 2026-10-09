@@ -73,6 +73,7 @@ with col1:
     df_platform = dataset.groupby("Platform")[["NA_Sales", "EU_Sales", "JP_Sales", "Other_Sales", "Global_Sales"]].aggregate("sum").reset_index()
     df_platform = df_platform.sort_values(by="Global_Sales", ascending=False).head(5)
     
+    # Melt dataframe untuk stacked bar chart yang bersih
     df_melted = df_platform.melt(
         id_vars='Platform', 
         value_vars=['NA_Sales', 'EU_Sales', 'JP_Sales', 'Other_Sales'],
@@ -81,14 +82,15 @@ with col1:
     )
     df_melted['Region'] = df_melted['Region'].str.replace('_Sales', '')
 
+    # Menggunakan barmode='stack' agar menumpuk ke atas, tapi dengan warna solid (tanpa arsiran)
     fig = px.bar(
         df_melted,
         x='Platform',
         y='Sales',
         color='Region',
-        barmode="group",
+        barmode="stack",  # Kembali bertumpuk ke atas
         title="Sales by Platform and Region",
-        color_discrete_sequence=px.colors.qualitative.Prism
+        color_discrete_sequence=px.colors.qualitative.Prism  # Warna solid modern
     )
     fig.update_layout(template="plotly_dark", yaxis=dict(rangemode="tozero"))
     st.plotly_chart(fig, use_container_width=True)
