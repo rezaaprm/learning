@@ -19,7 +19,8 @@ import numpy as np
 
 # Config Web Streamlit
 st.set_page_config(page_title="Video Games Sales", layout="wide")
-st.balloons()
+st.snow()
+st.toast("🎮")
 
 def example():
     rain(
